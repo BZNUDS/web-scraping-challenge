@@ -13,24 +13,33 @@ import pymongo
 import os
 import pandas as pd
 
+print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
 print("Entered scrape_mars.py")
-
-# Set-up path and browser
-executable_path = {'executable_path': ChromeDriverManager().install()}
-browser = Browser("chrome", **executable_path, headless=False)
-
-# # Initialize PyMongo to work with MongoDBs
-# conn = 'mongodb://localhost:27017'
-# client = pymongo.MongoClient(conn)
-
-# # Define database and collection  from Eli's Stu_Reddit_Scraper for 12.2.4 that he slacked to us at 7:51 on 3/16
-# db = client.mars_news_db
-# collection = db.articles
-# print(f'collection; {collection}')
+print()
 
 
-def mars_news(browser):
+# Initialize PyMongo to work with MongoDBs
+conn = 'mongodb://localhost:27017'
+client = pymongo.MongoClient(conn)
 
+# Define database and collection  from Eli's Stu_Reddit_Scraper for 12.2.4 that he slacked to us at 7:51 on 3/16
+db = client.mars_news_db
+collection = db.articles
+print(f'collection; {collection}')
+
+
+def mars_news():
+    # Initialize PyMongo to work with MongoDBs
+    conn = 'mongodb://localhost:27017'
+    client = pymongo.MongoClient(conn)
+
+    # Define database and collection 
+    db = client.mars_news_db
+    collection = db.articles
+    print(f'collection; {collection}')      
+    # Set-up path and browser
+    executable_path = {'executable_path': ChromeDriverManager().install()}
+    browser = Browser("chrome", **executable_path, headless=False)
     # Scrape Mars News
     # Visit the mars nasa news site
     url = 'https://redplanetscience.com/'
@@ -51,7 +60,10 @@ def mars_news(browser):
         # Use the parent element to find the paragraph text
         news_p = slide_elem.find("div", class_="article_teaser_body").get_text()
 
-    except AttributeError:
+    except Exception as e:
+        print()
+        print(f'error: {e}')
+        print()
         return None, None
 
     return news_title, news_p

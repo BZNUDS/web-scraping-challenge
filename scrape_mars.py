@@ -54,20 +54,21 @@ def scrape_all():
     print()
     print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
     print(f'hemisphere_image_urls: {hemisphere_image_urls} ')
-    
-    new_hemisphere_image_urls = [
-        {"title": "Mickey Mouse", "img_url": "https://marshemispheres.com/images/cerberus_enhanced.tif"},
-        {"title": "Mickey Mouse2", "img_url": "https://marshemispheres.com/images/full.jpg"}
-    ]
-    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-    print(f'new_hemisphere_image_urls: {new_hemisphere_image_urls} ')
-    print()      
+    # new_hemisphere_image_urls = hemisphere_image_urls
+
+    # new_hemisphere_image_urls = [
+    #     {"title": "Mickey Mouse", "img_url": "https://marshemispheres.com/images/cerberus_enhanced.tif"},
+    #     {"title": "Mickey Mouse2", "img_url": "https://marshemispheres.com/images/full.jpg"}
+    # ]
+    # print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    # print(f'new_hemisphere_image_urls: {new_hemisphere_image_urls} ')
+    # print()      
     all_data={
         "news_title": news_title,
         "news_p": news_p,
         "featured_image_url": featured_image_url,
         "facts" : html_table,
-        "hemispheres" : new_hemisphere_image_urls
+        "hemispheres" : hemisphere_image_urls
     }
     print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
     print(f'all_data in scrape_all function: {all_data} ')
@@ -162,9 +163,10 @@ def mars_facts():
     try:
         tables = pd.read_html(url)
         # Get Dataframe of first table
-        #print(f'($$$$$$$$$$$$$$$$$$$$$$$$$$$$$Tables in mars_facts is: {tables}')
+        print(f'($$$$$$$$$$$$$$$$$$$$$$$$$$$$$Tables in mars_facts is: {tables}')
         mars_facts_df = tables[0]
-        mars_facts_df.columns = ['Description', 'Value']
+        mars_facts_df.rename(columns={0: "Description", 1: "Mars", 2: "Earth"}, inplace=True)
+        mars_facts_df=mars_facts_df.set_index("Description")
         html_table = mars_facts_df.to_html()
         browser.quit()
         # print(f'html_table: {html_table}')
@@ -230,27 +232,36 @@ def mars_hemispheres():
 
                 # Create BeautifulSoup object; parse with 'html.parser'; find description iterables
                 enhanced_soup = BeautifulSoup(html, 'html.parser')
-                enhanced_results = enhanced_soup.find_all('div', class_='description')
+                enhanced_results = enhanced_soup.find_all('div', class_='downloads')
 
                 # Loop through returned results
                 for enhanced_result in enhanced_results:
                     # Error handling
                     try:
                         link = enhanced_result.a['href']
-    #                     print(link)
                         img_url=url + link
-    #                     print(img_url)
+                        print("How do the title and img_url look????????")
+                        print(f'title: {title}')
+                        print(f'img_url: {img_url}')
+                        print()
                     except Exception as e:
                         print(e)
-                
-    #             print(f'title: {title}')
-    #             print(f'img_url: {img_url}')
-
-        
+                hemisphere_image_urls.append(
+                    {
+                        'title': title,
+                        'img_url': img_url,
+                    }
+                )
+            
                 #Assigning value to a specific key. This key will be added if its not available already. 
-                Enhanced_dict[title] = img_url
-                print(f'Enhanced_dict is now: {Enhanced_dict}')
-                
+                # Enhanced_dict[title] = img_url
+                # print(f'Enhanced_dict is now: {Enhanced_dict}')
+
+                print()
+                print("How does the hemisphere_image_urls look AFTER the append????????")
+                print(f'hemisphere_image_urls: {hemisphere_image_urls}')
+                print()
+                print()
                 # Click on back button to return to home page
                 browser.links.find_by_partial_text('Back').click()
     #             print("Should sleep for 0.5")
@@ -261,7 +272,7 @@ def mars_hemispheres():
             return None
         i+=1
 
-    hemisphere_image_urls = Enhanced_dict
+    ###hemisphere_image_urls = Enhanced_dict
     # print()
     # print(f'hemisphere_image_urls: {hemisphere_image_urls}')
     # print()

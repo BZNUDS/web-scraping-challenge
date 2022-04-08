@@ -213,7 +213,6 @@ def mars_hemispheres():
                     }
                 )
 
-
                 # Click on back button to return to home page
                 browser.links.find_by_partial_text('Back').click()
                 time.sleep(0.5)

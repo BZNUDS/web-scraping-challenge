@@ -30,10 +30,6 @@ def scrape_all():
     news_title, news_p = mars_news()
     featured_image_url = featured_mars_image()
     html_table = mars_facts()
-    # print()
-    # print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-    # print(f'was df1 and html_table row, but now just trying to get html_table: {html_table} ')
-    # print()
     
     hemisphere_image_urls = mars_hemispheres()
     # new_hemisphere_image_urls = hemisphere_image_urls
@@ -52,9 +48,9 @@ def scrape_all():
         "facts" : html_table,
         "hemispheres" : hemisphere_image_urls
     }
-    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-    print(f'all_data in scrape_all function: {all_data} ')
-    print()  
+    # print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    # print(f'all_data in scrape_all function: {all_data} ')
+    # print()  
     return all_data
 
 def mars_news():

@@ -33,7 +33,7 @@ def scrape():
     # Run the scrape function (was mars_news but now scrape_all)
     mars_data = scrape_mars.scrape_all()
     print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-    print(f'Printing mars_data while in /scape: {mars_data}')
+    print(f'Printing mars_data after performing scrape_all while in /scape: {mars_data}')
     print()
 
 

@@ -23,20 +23,62 @@ conn = 'mongodb://localhost:27017'
 client = pymongo.MongoClient(conn)
 
 # Define database and collection  from Eli's Stu_Reddit_Scraper for 12.2.4 that he slacked to us at 7:51 on 3/16
-db = client.mars_news_db
+# db = client.mars_news_db
+db = client.mars
 collection = db.articles
 print(f'collection; {collection}')
 
 
-def mars_news():
-    # Initialize PyMongo to work with MongoDBs
-    conn = 'mongodb://localhost:27017'
-    client = pymongo.MongoClient(conn)
+def scrape_all():
+    new_hemisphere_image_urls = []
+    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    print('Entered scrape_all')
+    print()
+    news_title, news_p = mars_news()
+    print()
+    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    print(f'news_title, news_p: {news_title, news_p} ')
+    print()
+    featured_image_url = featured_mars_image()
+    print()
+    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    print(f'featured_image_url: {featured_image_url} ')
+    print()
+    html_table = mars_facts()
+    print()
+    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    print(f'was df1 and html_table row, but now just trying to get html_table: {html_table} ')
+    print()
+    
+    hemisphere_image_urls = mars_hemispheres()
+    print()
+    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    print(f'hemisphere_image_urls: {hemisphere_image_urls} ')
+    
+    new_hemisphere_image_urls = [
+        {"title": "Mickey Mouse", "img_url": "https://marshemispheres.com/images/cerberus_enhanced.tif"},
+        {"title": "Mickey Mouse2", "img_url": "https://marshemispheres.com/images/full.jpg"}
+    ]
+    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    print(f'new_hemisphere_image_urls: {new_hemisphere_image_urls} ')
+    print()      
+    all_data={
+        "news_title": news_title,
+        "news_p": news_p,
+        "featured_image_url": featured_image_url,
+        "facts" : html_table,
+        "hemispheres" : new_hemisphere_image_urls
+    }
+    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    print(f'all_data in scrape_all function: {all_data} ')
+    print()  
+    return all_data
 
-    # Define database and collection 
-    db = client.mars_news_db
-    collection = db.articles
-    print(f'collection; {collection}')      
+def mars_news():
+    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    print("Entered def mars_news")
+    print()
+
     # Set-up path and browser
     executable_path = {'executable_path': ChromeDriverManager().install()}
     browser = Browser("chrome", **executable_path, headless=False)
@@ -64,12 +106,17 @@ def mars_news():
         print()
         print(f'error: {e}')
         print()
+        browser.quit()
         return None, None
 
+    browser.quit()
+    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    print(f"In mars_news, news_title, news_p are: {news_title, news_p}")
+    print()
     return news_title, news_p
 
 
-def featured_mars_image(browser):
+def featured_mars_image():
     # Step 1 - Scraping:  JPL Mars Space Images - Featured Mars Image
 
     # Set-up path and browser
@@ -92,8 +139,8 @@ def featured_mars_image(browser):
         # Find full size image
         fade_in_image = soup.find_all("img", "headerimage fade-in")
         featured_image_url=url + fade_in_image[0]['src']
-        print(f'featured_image_url: {featured_image_url}')
-        print()
+        # print(f'featured_image_url: {featured_image_url}')
+        # print()
         browser.quit()
         return featured_image_url
 
@@ -103,7 +150,7 @@ def featured_mars_image(browser):
         return None
 
 
-def mars_facts(browser):
+def mars_facts():
         
     # Step 1 - Scraping:  JPL Mars Space Images - Mars Facts
 
@@ -115,21 +162,25 @@ def mars_facts(browser):
     try:
         tables = pd.read_html(url)
         # Get Dataframe of first table
-        df = tables[0]
-        print(df.head())
-
-        # Convert df to html
-        html_table = df.to_html()
+        #print(f'($$$$$$$$$$$$$$$$$$$$$$$$$$$$$Tables in mars_facts is: {tables}')
+        mars_facts_df = tables[0]
+        mars_facts_df.columns = ['Description', 'Value']
+        html_table = mars_facts_df.to_html()
         browser.quit()
-        print(f'html_table: {html_table}')
-        return df, html_table
+        # print(f'html_table: {html_table}')
+        # return df, html_table
+        print(f'($$$$$$$$$$$$$$$$$$$$$$$$$$$$$Now tables[0] in mars_facts is: {html_table}')
+        return html_table
 
     except Exception as e:
+        print()
+        print("?????????????????????????? Exception in mars_facts ????????????????????????????????")
         print(f'error: {e}')
+        print()
         browser.quit()
-        return None, None
+        return None
 
-def mars_hemispheres(browser):
+def mars_hemispheres():
 
     # Step 1 - Scraping:  Mars Hemispheres
 
@@ -157,6 +208,7 @@ def mars_hemispheres(browser):
     Enhanced_dict= {}
     mydict ={}
     hemisphere_image_urls = []
+    
 
     # Next look for <h3>
     for result in results:
@@ -197,7 +249,7 @@ def mars_hemispheres(browser):
         
                 #Assigning value to a specific key. This key will be added if its not available already. 
                 Enhanced_dict[title] = img_url
-                # print(f'Enhanced_dict is now: {Enhanced_dict}')
+                print(f'Enhanced_dict is now: {Enhanced_dict}')
                 
                 # Click on back button to return to home page
                 browser.links.find_by_partial_text('Back').click()
@@ -209,10 +261,10 @@ def mars_hemispheres(browser):
             return None
         i+=1
 
-    hemisphere_image_urls = [Enhanced_dict]
-    print()
-    print(f'hemisphere_image_urls: {hemisphere_image_urls}')
-    print()
+    hemisphere_image_urls = Enhanced_dict
+    # print()
+    # print(f'hemisphere_image_urls: {hemisphere_image_urls}')
+    # print()
     browser.quit()
     return hemisphere_image_urls
     

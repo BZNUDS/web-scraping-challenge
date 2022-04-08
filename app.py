@@ -9,10 +9,19 @@ print()
 # Create an instance of Flask
 app = Flask(__name__)
 
-# Use PyMongo to establish Mongo connection
+# Use flask to establish Mongo connection
+app.config["MONGO_URI"] ="mongodb://localhost:27017/mars_app"
+mongo = PyMongo(app)
 
-mongo = PyMongo(app, uri="mongodb://localhost:27017/mars_app")
+# # Initialize PyMongo to work with MongoDBs
+# conn = 'mongodb://localhost:27017'
+# client = pymongo.MongoClient(conn)
 
+# # Define database and collection 
+# # db = client.mars_news_db
+# db = client.mars
+# collection = db.articles
+# print(f'collection; {collection}')      
 
 # Route to render index.html template using data from Mongo
 @app.route("/")
@@ -21,10 +30,19 @@ def index():
     print('Entering index')
     print()
     # Find one record of data from the mongo database
-    mars = mongo.db.mars.find_one()
+    try:
+        mars = mongo.db.mars.find_one()
+    except Exception as e:
+        print()
+        print(f'error: {e}')
+        print()
+
+    print()
+    print(f'$$$$$$$$$$$mars in def index aka slash route: {mars}')
+    print()
 
     # Return template and data
-    return render_template("Templates/index.html", mars=mars)
+    return render_template("index.html", mars=mars)
 
 
 # Route that will trigger the scrape function
@@ -33,25 +51,19 @@ def scrape():
     print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
     print('Entering /scrape')
     print()
-    try:
-        mars = mongo.db.mars
-        # Run the scrape function
-        mars_data = scrape_mars.mars_news()
-        print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-        print('Printing mars_data: {mars_data}')
-        print()
-    except Exception as e:
-        print()
-        print(f'error: {e}')
-        print()
+
+    mars = mongo.db.mars
+    # Run the scrape function (was mars_news but now scrape_all)
+    mars_data = scrape_mars.scrape_all()
+    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    print(f'Printing mars_data...was mars_news but now scrape_all: {mars_data}')
+    print()
 
 
     # Update the Mongo database using update and upsert=True
-    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-    print('Commenting out the mars.update_one line ~50')
-    # mars.update_one({}, {"$set": mars_data}, upsert=True)
-    
-
+    print('$$$$$$$$$$$$$$$$$$$$$$$ ready to perform mars.update_one')
+    mars.update_one({}, {"$set": mars_data}, upsert=True)
+    print('$$$$$$$$$$$$$$$$$$$$$$$ did it perform mars.update_one????')
     # Redirect back to home page
     return redirect("/", code=302)
 
